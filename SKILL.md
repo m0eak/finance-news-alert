@@ -1,24 +1,20 @@
 ---
 name: finance-news-alert
-description: 使用轻量 RSS / 网页新闻源抓取国际与国内财经新闻，完成标准化、聚类、模型归因、简报与单条预警输出。适合金融新闻预警 PoC、市场简报生成、利好利空归因与后续 cron 定时分发方案设计。
+description: 使用轻量 RSS / 网页新闻源抓取国际与国内财经新闻，完成标准化、聚类与候选事件整理，再由当前聊天模型完成归因分析、简报与单条预警输出。适合金融新闻预警 PoC、市场简报生成、利好利空归因与后续定时分发方案设计。
 ---
 
 # finance-news-alert
 
-这是一个轻量金融新闻预警 Skill 的可试用原型。
+这是一个轻量金融新闻预警 Skill 的“当前模型版”原型。
 
-## 当前阶段
-- 已不再只是“抓取 + 标准化”骨架
-- 当前已具备：
+## 核心思路
+- 脚本层只负责：
   - 新闻抓取
   - 标准化
-  - 基础聚类
-  - 真实模型分析
-  - 简报输出
-  - 单条预警输出
-  - 第一轮噪音治理
-  - 排序 / 打分
-  - alert 阈值与 driver 优先逻辑
+  - 轻量聚类
+  - 候选事件整理
+- **不在脚本里调用任何外部模型 API**
+- 最终的金融影响分析、digest、alert，交给**当前聊天模型**完成
 
 ## 当前脚本
 - `scripts/fetch_news.py`
@@ -29,13 +25,11 @@ description: 使用轻量 RSS / 网页新闻源抓取国际与国内财经新闻
 - `scripts/cluster_news.py`
   - 做轻量聚类
   - 计算优先级分数与排序
-- `scripts/analyze_news.py`
-  - 调用真实模型做结构化金融影响分析
-- `scripts/render_digest.py`
-  - 生成 `digest.txt` 与 `alert.txt`
-  - 负责 alert 最终筛选逻辑
+- `scripts/prepare_analysis_input.py`
+  - 从聚类结果中挑出最值得分析的候选事件
+  - 输出给当前模型读取的 `analysis_input.json`
 - `scripts/run_poc.py`
-  - 串联整条 PoC 链路
+  - 串联整条前半段链路
 
 ## 当前输出目录
 - `data/raw/`
@@ -45,51 +39,43 @@ description: 使用轻量 RSS / 网页新闻源抓取国际与国内财经新闻
 - `data/clustered/`
   - 聚类结果
 - `data/analysis/`
-  - 模型分析结果
+  - 供当前模型读取的候选分析输入
 - `data/output/`
-  - 最终简报与单条预警文本
-
-## 当前能力
-### 已实现
-- 国际源：
-  - CNBC RSS
-  - FT RSS
-  - Yahoo Finance RSS
-- 国内源：
-  - 财联社电报
-- 输出结构包含：
-  - 摘要
-  - 利好方向
-  - 利空方向
-  - 逻辑
-  - 影响级别
-  - 置信度
-  - 是否建议提醒
-- 已实现 `signal_type`：
-  - `driver`
-  - `outcome`
-  - `mixed`
-  - `neutral`
-- 已实现 `driver bucket`：
-  - `macro_policy`
-  - `geopolitics_core`
-  - `liquidity_risk`
-  - `energy_chokepoint`
-  - `other_driver`
-- 当前单条提醒逻辑：
-  - 优先只认 `driver`
-  - `mixed` 基本不放行
+  - 可选的人类最终输出目录（如后续需要落盘）
 
 ## 当前适合做什么
-- 跑一轮金融新闻 PoC，查看当前新闻结构化输出
-- 观察简报排序是否合理
-- 观察单条提醒是否更偏向源头驱动事件
+- 跑一轮金融新闻 PoC，查看当前候选事件集合
+- 让当前模型基于 `analysis_input.json` 生成：
+  - 市场简报
+  - 单条高优先级提醒
+  - 利好 / 利空 / 逻辑归因
 - 继续迭代分类 / alert 阈值 / 规则边界
 - 为后续 `cron` + `message` 分发做准备
+
+## 使用方式
+先运行：
+
+```bash
+python3 scripts/run_poc.py
+```
+
+或：
+
+```bash
+bash scripts/manual_run.sh
+```
+
+然后由当前模型读取：
+- `data/analysis/analysis_input.json`
+
+并完成：
+- 结构化金融影响分析
+- digest 生成
+- 单条 alert 判断
 
 ## 当前不做
 - 不做交易建议
 - 不做自动下单
-- 不做复杂数据库 / Web 前端
-- 不做重型依赖集成（Docker / Lobster / OpenBB）
+- 不做脚本内置模型 API 调用
+- 不做重型依赖集成（Docker / OpenBB / 数据库）
 - 不直接承诺“全自动稳定推送”——当前更适合作为可试用原型继续打磨

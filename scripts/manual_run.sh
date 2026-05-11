@@ -8,11 +8,10 @@ python3 "$BASE_DIR/scripts/run_poc.py"
 
 echo
 echo "输出文件："
-echo "- $BASE_DIR/data/output/digest.txt"
-echo "- $BASE_DIR/data/output/alert.txt"
+echo "- $BASE_DIR/data/raw/news_raw.json"
+echo "- $BASE_DIR/data/normalized/news_normalized.json"
+echo "- $BASE_DIR/data/clustered/news_clustered.json"
+echo "- $BASE_DIR/data/analysis/analysis_input.json"
 echo
-echo "=== digest.txt（前 80 行） ==="
-sed -n '1,80p' "$BASE_DIR/data/output/digest.txt"
-echo
-echo "=== alert.txt（前 80 行） ==="
-sed -n '1,80p' "$BASE_DIR/data/output/alert.txt"
+echo "=== analysis_input.json（前 120 行） ==="
+sed -n '1,120p' "$BASE_DIR/data/analysis/analysis_input.json"
