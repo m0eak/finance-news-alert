@@ -4,7 +4,7 @@ cluster_news.py
 
 用途：
 - 对标准化后的新闻做轻量去重、聚类与优先级排序。
-- 把重复或相近事件合并成事件簇，减少模型分析阶段的噪音。
+- 把重复或相近事件合并成事件簇，减少后续当前模型分析阶段的噪音。
 
 输入：
 - `data/normalized/news_normalized.json`
@@ -13,8 +13,8 @@ cluster_news.py
 - 写入 `data/clustered/news_clustered.json`。
 
 在流程中的位置：
-- 第 3 步，负责生成给模型分析前的候选事件簇列表。
-- 下游由 `analyze_news.py` 调模型继续分析。
+- 第 3 步，负责生成给当前模型分析前的候选事件簇列表。
+- 下游由 `prepare_analysis_input.py` 继续裁剪与整理。
 """
 import json
 import pathlib
