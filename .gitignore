@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.DS_Store
+.env
+.env.*
+
+# generated outputs
+/data/raw/*.json
+/data/normalized/*.json
+/data/clustered/*.json
+/data/analysis/*.json
+/data/output/*.txt
+
+# keep docs in generated dirs
+!/data/README.md
+!/data/raw/README.md
+!/data/normalized/README.md
+!/data/clustered/README.md
+!/data/analysis/README.md
+!/data/output/README.md
